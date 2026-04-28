@@ -1,16 +1,21 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
+import nextTypescript from 'eslint-config-next/typescript'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const config = [
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  {
+    ignores: ['.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'node_modules/**'],
+  },
+  {
+    rules: {
+      // react-hooks v7 set-state-in-effect is brand-new and treats common
+      // hydration/data-fetch patterns as antipatterns. Keeping as a warning
+      // surfaces the signal without blocking CI; track the backlog of real
+      // refactors when we touch the UI in Phase 1+.
+      'react-hooks/set-state-in-effect': 'warn',
+    },
+  },
+]
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-];
-
-export default eslintConfig;
+export default config

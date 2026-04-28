@@ -39,9 +39,36 @@ export async function POST(request: Request) {
       return new Response(JSON.stringify({ error: 'Message required' }), { status: 400 })
     }
 
-    // 4. Get or create conversation
-    let convId = conversation_id
-    if (!convId) {
+    // Basic UUID format check before hitting the DB. Prevents a malformed
+    // client-supplied id from triggering a service-role query.
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+    // 4. Get or create conversation. If the client supplies a conversation_id
+    //    we must re-authorize it against the authenticated employee BEFORE
+    //    using the service role to read history or insert messages.
+    let convId: string
+    if (conversation_id) {
+      if (typeof conversation_id !== 'string' || !uuidPattern.test(conversation_id)) {
+        return new Response(JSON.stringify({ error: 'Invalid conversation_id' }), { status: 400 })
+      }
+
+      const { data: ownedConv, error: ownErr } = await supabaseAdmin
+        .from('kk_conversations')
+        .select('id, employee_id')
+        .eq('id', conversation_id)
+        .maybeSingle()
+
+      if (ownErr) {
+        return new Response(JSON.stringify({ error: 'Error verifying conversation' }), { status: 500 })
+      }
+
+      if (!ownedConv || ownedConv.employee_id !== employee.id) {
+        // Do not reveal existence vs. ownership; both map to forbidden.
+        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
+      }
+
+      convId = ownedConv.id
+    } else {
       const { data: conv, error: convError } = await supabaseAdmin
         .from('kk_conversations')
         .insert({ employee_id: employee.id })
@@ -76,45 +103,16 @@ export async function POST(request: Request) {
         content: m.content,
       }))
 
-    // 7. Pre-fetch lightweight context for the system prompt
-    let tipsBalance: number | null = null
-    let recentHours: number | null = null
-
-    if (employee.staff_id) {
-      // Quick peek at tips balance
-      const { data: tipsSummary } = await supabaseAdmin
-        .from('tips_reconciliation_summary')
-        .select('balance')
-        .eq('employee_id', employee.staff_id)
-        .single()
-
-      if (tipsSummary) {
-        tipsBalance = tipsSummary.balance ?? 0
-      }
-
-      // Quick peek at most recent hours
-      const { data: lastHours } = await supabaseAdmin
-        .from('employee_hours')
-        .select('total_hours')
-        .eq('employee_id', employee.staff_id)
-        .order('period_start', { ascending: false })
-        .limit(1)
-        .single()
-
-      if (lastHours) {
-        recentHours = lastHours.total_hours
-      }
-    }
-
-    // 8. Build system prompt
+    // 7. Build system prompt. We deliberately do NOT pre-fetch tips/hours
+    //    values here — having authoritative-looking numbers in the prompt
+    //    encourages the model to answer from prompt context instead of
+    //    calling the audited tool. The tool stays the single source of truth.
     const systemPrompt = buildSystemPrompt({
       firstName: employee.first_name,
       lastName: employee.last_name,
       restaurant: employee.restaurant,
       language: employee.preferred_language,
       staffId: employee.staff_id,
-      tipsBalance,
-      recentHours,
     })
 
     // 9. Tool context for handlers
@@ -232,9 +230,11 @@ export async function POST(request: Request) {
           )
           controller.close()
         } catch (err) {
-          const errorMsg = err instanceof Error ? err.message : 'Internal error'
+          // Log details server-side; return a generic message to the client
+          // so we do not leak schema/provider internals to the employee.
+          console.error('[/api/chat] stream error:', err)
           controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ type: 'error', error: errorMsg })}\n\n`)
+            encoder.encode(`data: ${JSON.stringify({ type: 'error', error: 'Something went wrong. Please try again.' })}\n\n`)
           )
           controller.close()
         }

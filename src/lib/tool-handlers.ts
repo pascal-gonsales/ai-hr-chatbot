@@ -153,7 +153,8 @@ async function handleDraftEmail(
     .single()
 
   if (error) {
-    return JSON.stringify({ error: 'Error creating draft', details: error.message })
+    console.error('[handleDraftEmail] supabase insert error:', error)
+    return JSON.stringify({ error: 'Error creating draft' })
   }
 
   // Log action

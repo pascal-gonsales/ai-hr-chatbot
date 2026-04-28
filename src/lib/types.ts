@@ -89,6 +89,22 @@ export interface QuickAction {
   updated_at: string
 }
 
+export interface AccessRequest {
+  id: string
+  email: string
+  name: string
+  message: string | null
+  status: 'pending' | 'approved' | 'rejected' | 'converted'
+  admin_notes: string | null
+  source_ip: string | null
+  user_agent: string | null
+  reviewed_by: string | null
+  reviewed_at: string | null
+  converted_employee_id: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface KnowledgeBaseEntry {
   id: string
   category: string

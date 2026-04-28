@@ -95,6 +95,16 @@ cp .env.example .env.local
 npm run dev
 ```
 
+## Product Program Docs
+
+This repo is now managed as a multi-session product program. Start here before any substantial implementation:
+
+- `project_mgmt/CLAUDE_START_HERE.md` - Claude Code bootstrap and session rules
+- `project_mgmt/SESSION_STATE.md` - current phase, blockers, next task
+- `docs/product/MASTER_PLAN.md` - roadmap from prototype to full employee lifecycle system
+- `docs/product/AI_BOUNDARIES.md` - safety rules for HR-sensitive AI behavior
+- `docs/product/KNOWLEDGE_BASE_SCHEMA.md` - how operational knowledge becomes approved AI-usable content
+
 ## License
 
 MIT

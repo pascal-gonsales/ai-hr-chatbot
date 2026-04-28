@@ -37,3 +37,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# obsidian (personal vault state, not part of the product)
+.obsidian/
+HR chatbot/
