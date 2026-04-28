@@ -196,3 +196,30 @@ purpose: Append-only chronological log of every Claude/Codex/Pascal session touc
 - src/lib/supabase/middleware.ts (auth path)
 - supabase/migrations/* (no new migrations)
 
+---
+
+## 2026-04-28 14:45 — codex — review_03_oss_portfolio_audit
+
+**What changed:**
+- Wrote local redacted review file: `project_mgmt/CODEX_REVIEW_03_2026-04-28.md`.
+- Reviewed session 03 public demo work in `ai-hr-chatbot`.
+- Reviewed `forensic-bookkeeping-pipeline` skill v1.2, README, active code/docs/tests, and anonymization posture.
+- Kept sensitive findings redacted in the review file so the review does not repeat private names.
+
+**Verdict:**
+- NEEDS_MAJOR_FIXES
+
+**Top 3 findings:**
+1. `ai-hr-chatbot/project_mgmt/CODEX_PROMPT_REVIEW_03_2026-04-28.md` repeats the sensitive terms it asks Codex to scan for. Redact before public portfolio use; if already pushed, handle history/repo cleanup.
+2. `forensic-bookkeeping-pipeline` active code/docs/tests still contain case-specific identifiers and fingerprints despite the README anonymization claim.
+3. `/api/demo/chat` is DB-isolated, but accepts arbitrary client-supplied history without total input-budget caps before calling Anthropic.
+
+**Validation:**
+- `python3 -B tests/synthetic/test_validator_safety.py` in `forensic-bookkeeping-pipeline`: 10/10 pass, with caveat that template-mode validation currently points to local `~/.claude`, not repo-local `skill/`.
+- `python3 -B test_parsers.py` in `forensic-bookkeeping-pipeline`: exit 0; 1 smoke test passed, 7 fixture tests skipped.
+- Targeted PII/secret scans run across both repos.
+
+**Next session priority:**
+1. Redact/rewrite public prompt and forensic repo identifiers before using these repos in CV applications.
+2. Add demo input/history budget limits.
+3. Point forensic synthetic tests at repo-local `skill/` and run them in CI.

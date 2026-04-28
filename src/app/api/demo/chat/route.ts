@@ -59,9 +59,18 @@ export async function POST(request: Request) {
 
   const anthropic = new Anthropic({ apiKey })
 
+  // Bound request body before parsing
+  const rawBody = await request.text().catch(() => null)
+  if (rawBody === null) {
+    return new Response(JSON.stringify({ error: 'Invalid request body' }), { status: 400 })
+  }
+  if (rawBody.length > 50_000) {
+    return new Response(JSON.stringify({ error: 'Request body too large (>50KB)' }), { status: 413 })
+  }
+
   let body: { message?: string; history?: Array<{ role: 'user' | 'assistant'; content: string }> }
   try {
-    body = await request.json()
+    body = JSON.parse(rawBody)
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 })
   }
@@ -71,6 +80,30 @@ export async function POST(request: Request) {
     return new Response(JSON.stringify({ error: 'Message required (max 2000 chars)' }), {
       status: 400,
     })
+  }
+
+  // Validate + bound history. Drop client-supplied history beyond the most recent
+  // entries; reject invalid roles/content; cap total history character budget.
+  const MAX_HISTORY_ENTRIES = 10
+  const MAX_HISTORY_CHARS_PER_ENTRY = 3000
+  const MAX_HISTORY_TOTAL_CHARS = 15_000
+
+  const validatedHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
+  let totalHistoryChars = 0
+  if (Array.isArray(history)) {
+    for (const entry of history.slice(-MAX_HISTORY_ENTRIES)) {
+      if (
+        !entry ||
+        (entry.role !== 'user' && entry.role !== 'assistant') ||
+        typeof entry.content !== 'string'
+      ) {
+        continue
+      }
+      const trimmed = entry.content.slice(0, MAX_HISTORY_CHARS_PER_ENTRY)
+      if (totalHistoryChars + trimmed.length > MAX_HISTORY_TOTAL_CHARS) break
+      validatedHistory.push({ role: entry.role, content: trimmed })
+      totalHistoryChars += trimmed.length
+    }
   }
 
   // Build system prompt for fixture employee (Sarah Chen at Le Bistro Demo)
@@ -85,10 +118,7 @@ export async function POST(request: Request) {
     '\n\n---\nDEMO MODE: This is a public read-only demo. No real data is being accessed. The employee, restaurant, tips, schedule, and KB entries are fixtures for portfolio demonstration. Email drafts are not actually saved or sent.'
 
   const initialMessages: Anthropic.MessageParam[] = [
-    ...history.slice(-20).map((m) => ({
-      role: m.role,
-      content: m.content,
-    })),
+    ...validatedHistory.map((m) => ({ role: m.role, content: m.content })),
     { role: 'user' as const, content: message },
   ]
 

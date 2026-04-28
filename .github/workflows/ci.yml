@@ -28,7 +28,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        # Use `npm install` instead of `npm ci` to tolerate platform-specific
+        # native dep differences (e.g. @emnapi/runtime is required on Linux
+        # runners but not present in a macOS-generated lock file).
+        run: npm install --no-audit --no-fund
 
       - name: Lint
         run: npm run lint
