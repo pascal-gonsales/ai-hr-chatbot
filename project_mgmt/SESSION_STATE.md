@@ -1,24 +1,35 @@
 # Session State
 
-Last updated: 2026-04-27 (Phase 0 hardening pass 2 closed)
-Current phase: Phase 0 — Stabilize Current Prototype (awaiting Codex sign-off)
+Last updated: 2026-04-28 (Session 03 — OSS portfolio polish + public demo deploy)
+Current phase: Phase 0 — Stabilize Current Prototype + Recruiter Portfolio Polish
 Current owner: Pascal sets priority; Claude Code implements; Codex reviews
 
 ## Awaiting
 
-**Codex review #02.** Prompt ready for Pascal to paste into Codex:
-`project_mgmt/CODEX_PROMPT_REVIEW_02_2026-04-27.md`
+**Codex review #02** (queued from session 02): `project_mgmt/CODEX_PROMPT_REVIEW_02_2026-04-27.md`. Reviews the Phase 0 hardening pass 2 reconciliation of Codex review #01. Verdict pending Pascal pasting prompt into Codex.
 
-Codex review #01 was NEEDS_MINOR_FIXES. Session 02 reconciled all 6 P1/P2 findings.
-Codex will write its verdict to `project_mgmt/CODEX_REVIEW_02_2026-04-27.md` and append to `SESSION_LOG.md`.
-
-- If READY → Phase 0 closed. Move to Phase 1 (case management core).
-- If NEEDS_MINOR_FIXES → next Claude session reconciles.
-- If NEEDS_MAJOR_FIXES → stop and re-plan with Pascal.
+**Codex review #03** (NEW, queued from this session 03 in Phase D of `~/CEO/job-hunt/SESSION_PLAN_OSS_PORTFOLIO_V2.md`): will be written at `project_mgmt/CODEX_PROMPT_REVIEW_03_2026-04-28.md` covering:
+- Public `/demo` route security (auth bypass scope, fixture isolation, no DB writes, rate limit)
+- README polish (PR #1) — anti-invention, OSS-vs-gated boundary
+- Repo-wide anonymization (now that project_mgmt + docs/product are public)
+- ANTHROPIC_API_KEY_DEMO scope (separate key, separate Vercel project)
 
 ## Current Goal
 
-Get TeamChat AI to a launch-gated, audited Phase 0 baseline so Phase 1 (case management) can build on solid ground without revisiting auth, schema, or AI safety.
+Two parallel goals:
+
+1. **TeamChat AI Phase 0 → Phase 1.** Same as before. Awaiting Codex #02 verdict before moving to case management core.
+2. **OSS portfolio polish for CV anchoring.** This session ships the OSS repo as a recruiter-facing artifact: live demo URL, polished README, public Codex collaboration record. Goal is CV-ready by end of day so Pascal can apply to Lightspeed + MTY tomorrow morning.
+
+## Public deployment (NEW this session)
+
+- **OSS Vercel project:** `hanumets-projects/ai-hr-chatbot`
+- **Production URL:** `https://ai-hr-chatbot-one.vercel.app/`
+- **Public demo:** `https://ai-hr-chatbot-one.vercel.app/demo` and `/demo/chat` (no auth, real Claude tool use, fixture data)
+- **Env vars on Vercel:** ANTHROPIC_API_KEY (real, demo-scoped key), NEXT_PUBLIC_SUPABASE_URL/_ANON_KEY/_SERVICE_ROLE_KEY (placeholders only — production routes won't actually function on this OSS deploy, which is correct per OSS-vs-gated split)
+- **Cost guardrails on demo:** in-memory per-IP rate limit (8 msg/min), max_tokens 1024, max 5 tool iterations, Haiku 4.5 model (~$0.02/conversation)
+
+The Kaikido production deployment (gated, paying customers) remains separate. Not in this repo.
 
 ## Where to read history
 
@@ -27,41 +38,43 @@ Get TeamChat AI to a launch-gated, audited Phase 0 baseline so Phase 1 (case man
 - Codex verdicts: `project_mgmt/CODEX_REVIEW_NN_<date>.md`.
 - Codex prompts (queued for Pascal to paste): `project_mgmt/CODEX_PROMPT_REVIEW_NN_<date>.md`.
 
-This file (`SESSION_STATE.md`) is the live snapshot. It does not duplicate SESSION_LOG.md.
-
-## Open Risks (going into Codex review #02)
+## Open Risks
 
 | # | Risk | Owner | Status |
 |---|---|---|---|
-| 1 | Migrations 004 + 005 not yet applied to a Supabase project | Pascal | Decide staging vs prod, then run via supabase CLI or SQL editor |
-| 2 | `PUBLIC_ACCESS_REQUEST_ENABLED` defaults to off (form returns 503) | Pascal | Must remain off until CAPTCHA + edge rate limit are wired |
-| 3 | CAPTCHA vendor not chosen (Turnstile likely) | Pascal | Decision needed before any public launch of the access-request form |
-| 4 | `labor_shifts` name-string lookup in `tool-handlers.ts` (P1, RISK_REGISTER) | Claude (when schedule tooling is touched) | Pre-existing, untouched this session |
-| 5 | 4 lint warnings in pre-existing UI (set-state-in-effect, exhaustive-deps, ref cleanup) | Claude (when Phase 1 UI lands) | Demoted to warn in eslint config |
-| 6 | Embedded Supabase service-role token visible in `~/.claude.json` (`claude mcp list` exposes it) | Pascal | Rotate + move to env var before any screen-share or repo audit |
+| 1 | Migrations 004 + 005 not yet applied to a Supabase project | Pascal | Decide staging vs prod |
+| 2 | `PUBLIC_ACCESS_REQUEST_ENABLED` defaults to off (form returns 503) | Pascal | Must remain off until CAPTCHA + edge rate limit |
+| 3 | CAPTCHA vendor not chosen (Turnstile likely) | Pascal | Decision needed before public launch |
+| 4 | `labor_shifts` name-string lookup in `tool-handlers.ts` (P1, RISK_REGISTER) | Claude (when schedule tooling is touched) | Pre-existing |
+| 5 | 4 lint warnings in pre-existing UI | Claude (when Phase 1 UI lands) | Demoted to warn |
+| 6 | Embedded Supabase service-role token visible in `~/.claude.json` | Pascal | Rotate + move to env var |
 | 7 | Embedded GitHub token in local git remote | Pascal | Outside Claude scope |
-| 8 | KB metadata migration (PRD-0.6) not done | Claude (post Phase 0 close) | Schema design ready in `docs/product/KNOWLEDGE_BASE_SCHEMA.md` |
+| 8 | KB metadata migration (PRD-0.6) not done | Claude (post Phase 0 close) | Schema design ready |
+| 9 | **NEW:** Production chat route uses deprecated model `claude-sonnet-4-20250514`. Demo route fixed to `claude-haiku-4-5-20251001`. Production not touched (Codex #02 scope). | Claude (post Codex #02 verdict) | Will fix in Phase 0 follow-up or Phase 1 |
+| 10 | **NEW:** CI workflow on GitHub fails at `npm ci` due to platform-specific deps missing from `package-lock.json` (`@emnapi/runtime` Linux binary). Vercel build works because Vercel uses `npm install`. | Claude (next session) | Run `npm install --include=optional` locally to regenerate lock |
 
 ## Blockers / Questions For Pascal
 
-- Which Supabase project to apply migrations 004 + 005 against (staging/prod)?
-- CAPTCHA vendor pick: Turnstile (Cloudflare, free) recommended; confirm before public launch.
-- Where is the source knowledge base stored (Notion, Drive, voice notes)? Needed before PRD-0.6 work has real content.
-- Which restaurant role first for onboarding/training (server / kitchen helper)?
+- Which Supabase project to apply migrations 004 + 005 against?
+- CAPTCHA vendor pick: Turnstile?
+- Where is the source knowledge base stored?
+- Which restaurant role first for onboarding/training?
 - Multi-tenant from day one or single-restaurant first?
+- **NEW:** Merge PR #1 (README polish) once reviewed?
+- **NEW:** Want a custom domain on the OSS demo (e.g. `demo.wwithai.com` once wwithai.com is set up) instead of `ai-hr-chatbot-one.vercel.app`?
 
 ## Next Recommended Claude Session
 
-Branches based on Codex review #02 verdict:
+If Codex #02 returns READY:
+- Move to Phase 1 (case management vertical slice)
+- Fix risk #9 (model ID) and risk #10 (CI lock file) as a small hygiene PR before Phase 1 starts.
 
-**If READY (Phase 0 closed):**
-- Phase 1 vertical slice — case management core. One employee flow + one manager flow + DB model + audit trail + tests.
-- Replace the copy-email pattern with structured case records. `docs/product/PRODUCT_REQUIREMENTS.md` PRD-1.1/PRD-1.2 are the spec.
+If Codex #02 returns NEEDS_MINOR_FIXES:
+- Reconcile findings as session 04.
+- Risk #9 + #10 batched in.
 
-**If NEEDS_MINOR_FIXES:**
-- Reconcile findings using `superpowers:receiving-code-review` first.
-- Implement using `superpowers:subagent-driven-development` where parallel-safe.
-- Verify with `superpowers:verification-before-completion`.
+If Codex #03 (this session's review) flags issues:
+- Reconcile per `SESSION_PLAN_OSS_PORTFOLIO_V2.md` Phase E.
 
 **Standing rule:** do not start onboarding/training UI yet. Phase 0 must be Codex-READY first.
 
@@ -69,4 +82,4 @@ Branches based on Codex review #02 verdict:
 
 This repo runs on the multi-session Claude/Codex ping-pong protocol documented in `CLAUDE.md` (root) and `AGENTS.md` (root). Both live in this repo so any agent picking up cold has the context.
 
-Superpowers plugin (`obra/superpowers-marketplace`) installed Pascal-side this session — gives `subagent-driven-development`, `receiving-code-review`, `verification-before-completion`, `using-git-worktrees`, and others. Used in session 02 reconciliation.
+Superpowers plugin (`obra/superpowers-marketplace`) installed Pascal-side; available skills include `subagent-driven-development`, `receiving-code-review`, `verification-before-completion`, `using-git-worktrees`.

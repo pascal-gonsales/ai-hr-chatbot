@@ -80,3 +80,22 @@ Append-only. Newest entries at bottom.
 - Basis: react-hooks v7 ships a brand-new strict rule that flags common, intentional patterns: hydration checks (`useEffect(() => { if (localStorage.getItem(...)) setState(...) }, [])`) and standard data-fetch-on-mount patterns. The errors are in pre-existing UI components that are not in this session's scope. Demoting to warn preserves the signal (warnings still surface in `npm run lint`) without blocking CI on out-of-scope refactors.
 - Impact: Backlog item: when Phase 1 touches the UI, refactor `login/page.tsx` and `AdminConversationList.tsx` to satisfy the rule. At that point, consider promoting the rule back to error.
 
+
+## 2026-04-28 — OSS public demo deployed as separate Vercel project
+
+- **Decision:** The OSS repo `ai-hr-chatbot` is deployed as its own Vercel project at `hanumets-projects/ai-hr-chatbot`, production URL `https://ai-hr-chatbot-one.vercel.app/`. The `/demo` and `/demo/chat` routes are publicly accessible without authentication. The Kaikido production deployment for paying customers stays separate (different project, different URL, different env vars).
+- **Basis:** Phase 7 portfolio audit (`~/CEO/audits/2026-04-27/7-portfolio-alignment.md`) and OSS-vs-gated decision locked 2026-04-27 in `~/CEO/OS/decisions.jsonl`. Pattern: Hashicorp/Sentry/Supabase. Public sample = portfolio + lead-gen, gated = paid product. Recruiters need a clickable live demo for the CV; the gated production app cannot serve that role without exposing customer data.
+- **Impact:** Two parallel deployments now exist for this codebase. Source of truth is the OSS repo; the gated production deployment is downstream of it and applies its own customer-specific configuration. Future Phase 1 work continues against the OSS repo with the same Claude/Codex review cycle. The demo route is locked to read-only fixtures and rate-limited per IP.
+
+## 2026-04-28 — Demo route uses Haiku 4.5; production stays on legacy model ID until Codex #02
+
+- **Decision:** `src/app/api/demo/chat/route.ts` uses `claude-haiku-4-5-20251001`. The production chat route (`src/app/api/chat/route.ts`) still references `claude-sonnet-4-20250514` (deprecated, returns 404 from Anthropic API). Production model fix is intentionally NOT applied in this session.
+- **Basis:** Production chat route is under Codex review #02 scope (queued in `CODEX_PROMPT_REVIEW_02_2026-04-27.md`). Modifying it here would expand the Codex #02 surface mid-review and break the structured ping-pong protocol. The demo route is additive (new file) and outside that scope, so updating its model is safe.
+- **Impact:** Production app cannot make real Claude API calls until the model ID is fixed. This is a known issue that will be addressed either (a) as part of Codex #02 reconciliation if Codex flags it, or (b) as a small hygiene fix immediately after Codex #02 closes. Logged as risk #9 in SESSION_STATE.md.
+
+## 2026-04-28 — Public demo guarded by IP rate limit + Haiku + bounded tool loop
+
+- **Decision:** Demo route enforces these bounds: per-IP rate limit of 8 messages / minute (in-memory, per-instance), max_tokens=1024 per Claude call, max 5 iterations of the tool-use loop, Haiku 4.5 (cheaper than Sonnet). Cost ceiling per conversation ≈ $0.02. Realistic monthly cost at portfolio traffic levels ≈ $5–30.
+- **Basis:** The demo is publicly accessible without authentication, so a bad actor could exhaust the API budget. Anthropic API key for the demo is a NEW key Pascal created on 2026-04-28 specifically for the OSS demo (`ANTHROPIC_API_KEY_DEMO` in `~/.config/wwithai/credentials.env`); it can be capped or rotated independently of production keys.
+- **Impact:** Demo cost is bounded and segregated from production keys. If abused at scale, Pascal can rotate the key in the Anthropic console without affecting production. The in-memory rate limit is per-instance (not per-deployment cluster), so it will not perfectly bound a multi-region deploy — sufficient for a portfolio demo, would need Redis or Vercel KV for stronger guarantees in production.
+

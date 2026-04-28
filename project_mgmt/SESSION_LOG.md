@@ -137,3 +137,62 @@ purpose: Append-only chronological log of every Claude/Codex/Pascal session touc
 3. Add or explicitly gate CAPTCHA/Turnstile before public access-request launch.
 
 ---
+
+## 2026-04-28 13:40 — claude — session_03_oss_portfolio_polish
+
+**Driving plan:** `~/CEO/job-hunt/SESSION_PLAN_OSS_PORTFOLIO_V2.md` (Pascal greenlit). This session covered Phases A through B-2 against this repo (Phase A also touched `pascal-gonsales/pascal-gonsales` profile-readme). Phases C-0 through E executed in subsequent contiguous work.
+
+**What changed in this repo (ai-hr-chatbot):**
+
+- **Bootstrap commits (B-0):**
+  - `4c86a03 chore: bootstrap files + project_mgmt + product docs` — published CLAUDE.md, AGENTS.md, full project_mgmt/ tree, full docs/product/ tree to public OSS repo. The Claude/Codex collaboration pattern Pascal described as "gold for recruiters" is now publicly verifiable.
+  - `e451bc1 feat(phase0): Codex review #01 reconciliation pass 2` — committed the 9 modified files from session 02 + supabase/migrations 004+005 + tests/ + admin route + vitest config + package-lock. All 6 P1/P2 findings closed (P1.1 RPC lockdown, P1.2 abuse path, P1.3 CI green, P2.1 redaction, P2.2 prompt source, P2.3 admin convert validation).
+  - `51a947f ci: GitHub Actions workflow for lint + tsc + tests + build` — published `.github/workflows/ci.yml`.
+
+- **Public demo route (B-1) — additive only, no modification of existing auth/chat-route/tool-handlers:**
+  - `9379f2e feat(demo): public /demo route with seeded read-only fixtures`
+  - `a75dda6 fix(demo): use claude-haiku-4-5-20251001 (current model)` — production route still uses deprecated `claude-sonnet-4-20250514` per Codex #02 scope, untouched.
+  - New files: `src/app/demo/page.tsx`, `src/app/demo/chat/page.tsx`, `src/app/api/demo/chat/route.ts`, `src/components/demo/DemoChatInterface.tsx`, `src/lib/demo/fixtures.ts`, `src/lib/demo/tool-handlers.ts`.
+  - 1-line config change: `src/middleware.ts` matcher now excludes `demo|api/demo` from auth middleware. No auth logic touched.
+  - Per-IP rate limit (8 msg/min, in-memory), max_tokens 1024, max 5 tool iterations.
+
+- **Vercel project (NEW):**
+  - `hanumets-projects/ai-hr-chatbot` linked.
+  - Env vars set in Production: ANTHROPIC_API_KEY (real demo-scoped key Pascal created today), NEXT_PUBLIC_SUPABASE_URL/_ANON_KEY/_SERVICE_ROLE_KEY (placeholders).
+  - Production URL: `https://ai-hr-chatbot-one.vercel.app/` (Vercel auto-suffixed `-one` due to project-name collision).
+  - Public demo verified: `/demo` and `/demo/chat` return 200, `/api/demo/chat` end-to-end test confirmed real Claude tool use loop with fixture data (Sarah Chen tip balance query → tool_use → tool_result → text response).
+
+- **README polish (B-2) — open in PR #1 awaiting Pascal review:**
+  - PR: https://github.com/pascal-gonsales/ai-hr-chatbot/pull/1
+  - Branch: `polish-readme-2026-04-28`
+  - New README structure: hero badges → live demo CTA → "How this repo is built" Codex collab cycle headline → architecture → tools → DB design → OSS-vs-gated → project structure → setup → docs index → license → author.
+  - Added LICENSE file (MIT) — was claimed in old README without an actual file.
+  - **Don't merge to main without Pascal sanity-check** per session plan §4 Phase B-2.
+
+**Validation (fresh, this session):**
+- npm run lint: 0 errors, 4 warnings (all pre-existing UI hooks, demoted to warn per session 02 decision)
+- npx tsc --noEmit: clean
+- npm test: 7/7 pass
+- npm run build (with placeholder env vars): all routes compile including new /demo, /demo/chat, /api/demo/chat
+- End-to-end demo API test: Sarah Chen tip balance flow returns full streaming response with real `get_employee_tips` tool call
+
+**Codex review #01 status:** still RECONCILED ✅ (no regressions this session). Codex review #02 prompt still queued for Pascal to paste.
+
+**Open at end of session:**
+- PR #1 (README polish) awaiting Pascal review/merge.
+- CODEX_PROMPT_REVIEW_03 not yet written (will be written in Phase D of the OSS portfolio plan).
+- Risk #9 NEW: production route uses deprecated model ID. Demo fixed; production deferred to Codex #02 scope.
+- Risk #10 NEW: GH Actions CI failed on `npm ci` (platform-specific dep `@emnapi/runtime` missing from `package-lock.json`). Vercel deploys fine because it uses `npm install`. Fix is to regenerate lock with `npm install --include=optional`.
+
+**Next session priority (after Codex #03 verdict):**
+- Per SESSION_PLAN_OSS_PORTFOLIO_V2.md Phase E: reconcile any Codex #03 findings.
+- Then Pascal applies to Lightspeed + MTY (separate session, not this repo).
+
+**Files NOT touched this session:**
+- src/components/* (production UI, except adding new src/components/demo/ subtree)
+- src/app/api/chat/route.ts (production chat API, under Codex #02 scope)
+- src/lib/tool-handlers.ts (production tool handlers, under Codex #02 scope)
+- src/lib/system-prompt.ts (used by both prod and demo, but NOT modified — demo route just calls the existing builder)
+- src/lib/supabase/middleware.ts (auth path)
+- supabase/migrations/* (no new migrations)
+
