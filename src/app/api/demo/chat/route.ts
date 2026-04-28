@@ -104,7 +104,10 @@ export async function POST(request: Request) {
           maxIterations--
 
           const response = await anthropic.messages.create({
-            model: 'claude-sonnet-4-20250514',
+            // Haiku 4.5 — current model, cheap + fast, sufficient for the demo's
+            // tool-use loop. Production chat route uses a different model (under
+            // Codex #02 review scope, untouched here).
+            model: 'claude-haiku-4-5-20251001',
             max_tokens: 1024,
             system: systemPrompt,
             tools: chatTools,
