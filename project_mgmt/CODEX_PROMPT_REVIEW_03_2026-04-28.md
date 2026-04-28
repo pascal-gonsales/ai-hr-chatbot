@@ -53,13 +53,13 @@ The new `/demo` route is publicly accessible without authentication. Verify:
 
 5. **Rate limit is bounded.** In-memory per-IP limit: 8 messages / minute. `max_tokens: 1024`. Max 5 tool iterations. `claude-haiku-4-5-20251001` (cheap). Consider whether the in-memory limit is meaningful at scale (per-instance, not per-deployment cluster), and whether anything else should bound abuse.
 
-6. **Fixture data is genuinely fictional.** `src/lib/demo/fixtures.ts` has Sarah Chen at Le Bistro Demo, fake email `sarah.chen@bistro-demo.example`, fake `staff_id: 'demo-staff-001'`, fake employee UUID. Confirm no real-data leaks (employee names from real REDACTED_OWNER ops, real bank account numbers, real customer emails).
+6. **Fixture data is genuinely fictional.** `src/lib/demo/fixtures.ts` has Sarah Chen at Le Bistro Demo, fake email `sarah.chen@bistro-demo.example`, fake `staff_id: 'demo-staff-001'`, fake employee UUID. Confirm no real-data leaks (employee names from real operations, real bank account numbers, real customer emails).
 
 ### B. Anonymization — both repos
 
 This was the headline find this session: PII was discovered in pre-existing OSS code.
 
-**ai-hr-chatbot:** Run an exhaustive PII grep across `src/`, `docs/`, `project_mgmt/`, `supabase/migrations/`, `tests/`, `README.md`, etc. Confirm zero hits for: REDACTED_OWNER, RESTAURANT_B, RESTAURANT_C, RESTAURANT_D, CLIENT_A, CLIENT_A_OWNER, CLIENT_A_LASTNAME, TRUSTEE_FIRSTNAME, TRUSTEE_LASTNAME, OWNER_LASTNAME, Pascal Gonsales (in that exact case), STREET_FRAGMENT, NEIGHBORHOOD, OWNER_DOMAIN. (The README.md author footer mentions "Pascal Gonsales" by name with link to github — that's intended self-attribution, not a leak.)
+**ai-hr-chatbot:** Run an exhaustive PII grep across `src/`, `docs/`, `project_mgmt/`, `supabase/migrations/`, `tests/`, `README.md`, etc. The terms to scan for are debtor-specific identifiers Pascal has shared privately; I am not reproducing them in this public prompt. Confirm zero hits in active tracked files. The README.md author footer mentions Pascal by name with link to github — that's intended self-attribution, not a leak.
 
 **forensic-bookkeeping-pipeline:** Same scan, excluding `legacy/` (v3.2 archive intentionally retains real names). Confirm the env-var refactor in `pipeline.py` and `pdf_parsers_v2.py` actually replaced ALL hardcoded names. Test that:
 - `pipeline.py` with no env var: 85 rules, 1 trustee rule (generic only)
@@ -77,7 +77,7 @@ The skill (Claude operating contract) is now public at `/skill/`. Review:
 
 2. **Routing boundaries (`skill/references/routing-boundaries.md`).** Pascal explicitly does not have a lawyer (consumer proposal active, relies on syndic + skill). The skill must NOT freelance on legal interpretation. Verify the routing language is conservative.
 
-3. **Reusability across debtors.** The skill is anonymous by contract. Verify SKILL.md and references/ files contain no real names, no real entity references, no `REDACTED_OWNER`/`RESTAURANT_B`/etc.
+3. **Reusability across debtors.** The skill is anonymous by contract. Verify SKILL.md and references/ files contain no real names, no real entity references, no debtor-specific identifiers.
 
 4. **Templates.** 10 CSV/MD templates at `skill/assets/templates/`. Confirm they have only column headers + sample placeholder rows (no real bank data, no real names).
 
@@ -104,7 +104,7 @@ The skill (Claude operating contract) is now public at `/skill/`. Review:
 What Pascal did NOT verify (please flag if you think any matter):
 - Did NOT run the synthetic tests (`tests/synthetic/test_validator_safety.py`) end-to-end — only confirmed they import.
 - Did NOT apply migrations 004+005 to a Supabase database (still pending Pascal action per session 02 / Codex #02 scope).
-- Did NOT run a real bank statement through the v1.2 pipeline (working copy at `~/CEO/forensic-bookkeeping/` should still produce identical output to v1.1 with `TRUSTEE_NAME=TRUSTEE_FIRSTNAME TRUSTEE_LASTNAME` env var set; not regression-tested).
+- Did NOT run a real bank statement through the v1.2 pipeline (working copy at `~/CEO/forensic-bookkeeping/` should still produce identical output to v1.1 with `TRUSTEE_NAME` env var set to the real trustee name; not regression-tested).
 
 ---
 
