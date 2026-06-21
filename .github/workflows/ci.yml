@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+
+    env:
+      # Build-time placeholders so Next.js does not fail on missing env vars
+      # during static analysis. Real secrets live in the deployment platform.
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+      ANTHROPIC_API_KEY: placeholder-anthropic-key
+      PUBLIC_ACCESS_REQUEST_ENABLED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        # Use `npm install` (not `npm ci`) to tolerate platform-specific native
+        # dep differences between the lockfile host and the Linux runner.
+        run: npm install --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
