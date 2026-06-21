@@ -8,14 +8,14 @@ const translations: Record<string, Record<Lang, string>> = {
 
   // --- LoginForm ---
   'login.email_label': { fr: 'Adresse email', en: 'Email address' },
-  'login.email_placeholder': { fr: 'ton@email.com', en: 'your@email.com' },
+  'login.email_placeholder': { fr: 'vous@example.com', en: 'you@example.com' },
   'login.send_code': { fr: 'Recevoir mon code', en: 'Get my code' },
   'login.sending': { fr: 'Envoi en cours...', en: 'Sending...' },
   'login.email_not_registered': { fr: 'Cet email n\'est pas enregistre.', en: 'This email is not registered.' },
-  'login.email_not_registered_help': { fr: 'Ton compte est configure avec ton email. Verifie ou ecris a admin@demo-restaurants.com pour de l\'aide.', en: 'Your account is set up with your email. Check or email admin@demo-restaurants.com for help.' },
+  'login.email_not_registered_help': { fr: 'Ton compte est configure avec ton email. Verifie ou ecris a admin@northstar-demo.example pour de l\'aide.', en: 'Your account is set up with your email. Check or email admin@northstar-demo.example for help.' },
   'login.rate_limit': { fr: 'Trop de tentatives. Attends quelques instants avant de reessayer.', en: 'Too many attempts. Wait a moment before trying again.' },
   'login.request_access': { fr: 'Demander l\'acces', en: 'Request access' },
-  'login.no_access_yet': { fr: 'Besoin d\'aide ? Ecris a admin@demo-restaurants.com', en: 'Need help? Email admin@demo-restaurants.com' },
+  'login.no_access_yet': { fr: 'Besoin d\'aide ? Ecris a admin@northstar-demo.example', en: 'Need help? Email admin@northstar-demo.example' },
 
   // Code step
   'login.code_sent_to': { fr: 'Code envoye a', en: 'Code sent to' },
@@ -56,7 +56,7 @@ const translations: Record<string, Record<Lang, string>> = {
   'chat.tool_email': { fr: 'Preparation de l\'email pour la direction...', en: 'Preparing email for management...' },
   'chat.tool_knowledge': { fr: 'Recherche dans les politiques...', en: 'Searching policies...' },
   'chat.email_ready': { fr: 'Email pret a envoyer', en: 'Email ready to send' },
-  'chat.email_instructions': { fr: 'Copie et envoie a admin@demo-restaurants.com', en: 'Copy and send to admin@demo-restaurants.com' },
+  'chat.email_instructions': { fr: 'Copie et envoie a admin@northstar-demo.example', en: 'Copy and send to admin@northstar-demo.example' },
   'chat.tips_loaded': { fr: 'Donnees pourboires chargees', en: 'Tips data loaded' },
   'chat.tips_owed': { fr: 'Du', en: 'Owed' },
   'chat.tips_paid': { fr: 'Paye', en: 'Paid' },

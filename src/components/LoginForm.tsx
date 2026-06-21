@@ -283,7 +283,7 @@ export default function LoginForm({ lang }: LoginFormProps) {
 
       <div className="text-center">
         <a
-          href="mailto:admin@demo-restaurants.com"
+          href="mailto:admin@northstar-demo.example"
           className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
         >
           {t('login.no_access_yet', lang)}

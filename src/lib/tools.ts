@@ -31,7 +31,7 @@ export const chatTools: Anthropic.Tool[] = [
   },
   {
     name: 'draft_email_to_management',
-    description: 'Prepares an email that the employee can copy and send to admin@demo-restaurants.com. Use this tool when: leave/vacation request, reporting an important issue, formal request that needs escalation, or when the employee accepts a follow-up/confirmation email. The email is NOT sent automatically - the employee copies and sends it themselves.',
+    description: 'Prepares an email that the employee can copy and send to admin@northstar-demo.example. Use this tool when: leave/vacation request, reporting an important issue, formal request that needs escalation, or when the employee accepts a follow-up/confirmation email. The email is NOT sent automatically - the employee copies and sends it themselves.',
     input_schema: {
       type: 'object' as const,
       properties: {

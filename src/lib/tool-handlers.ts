@@ -146,7 +146,7 @@ async function handleDraftEmail(
       employee_id: context.employeeId,
       subject,
       body,
-      recipient: 'admin@demo-restaurants.com',
+      recipient: 'admin@northstar-demo.example',
       urgency: urgency || 'normal',
     })
     .select('id')
@@ -167,10 +167,10 @@ async function handleDraftEmail(
   return JSON.stringify({
     success: true,
     draft_id: draft.id,
-    message: `Email prepared successfully. Subject: "${subject}". Show the content to the employee and tell them to copy the email and send it to admin@demo-restaurants.com.`,
+    message: `Email prepared successfully. Subject: "${subject}". Show the content to the employee and tell them to copy the email and send it to admin@northstar-demo.example.`,
     email_subject: subject,
     email_body: body,
-    send_to: 'admin@demo-restaurants.com',
+    send_to: 'admin@northstar-demo.example',
   })
 }
 

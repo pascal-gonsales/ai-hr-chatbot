@@ -204,7 +204,7 @@ export default function AdminEmployeeList() {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
               className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm"
-              placeholder="employee@email.com"
+              placeholder="employee@northstar-demo.example"
             />
           </div>
           <div className="grid grid-cols-3 gap-3">

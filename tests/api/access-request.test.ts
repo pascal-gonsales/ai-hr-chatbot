@@ -35,7 +35,7 @@ describe('/api/access-request', () => {
 
     const { POST } = await import('@/app/api/access-request/route')
 
-    const res = await POST(makeRequest({ email: 'a@b.co', name: 'A' }))
+    const res = await POST(makeRequest({ email: 'a@example.com', name: 'A' }))
     expect(res.status).toBe(503)
   })
 
@@ -59,7 +59,7 @@ describe('/api/access-request', () => {
 
     const { POST } = await import('@/app/api/access-request/route')
 
-    const res = await POST(makeRequest({ email: 'spammer@b.co', name: 'Spammer' }))
+    const res = await POST(makeRequest({ email: 'spammer@example.com', name: 'Spammer' }))
     expect(res.status).toBe(429)
     expect(insert).not.toHaveBeenCalled()
   })
@@ -96,7 +96,7 @@ describe('/api/access-request', () => {
 
     const { POST } = await import('@/app/api/access-request/route')
 
-    const res = await POST(makeRequest({ email: 'new@b.co', name: 'New User' }))
+    const res = await POST(makeRequest({ email: 'new@example.com', name: 'New User' }))
     expect(res.status).toBe(200)
     expect(insert).toHaveBeenCalledTimes(1)
   })
@@ -124,7 +124,7 @@ describe('/api/access-request', () => {
 
     const { POST } = await import('@/app/api/access-request/route')
 
-    const res = await POST(makeRequest({ email: 'dup@b.co', name: 'Dup' }))
+    const res = await POST(makeRequest({ email: 'dup@example.com', name: 'Dup' }))
     expect(res.status).toBe(200)
   })
 })
