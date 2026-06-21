@@ -78,6 +78,10 @@ tests/api/          ownership + access-request tests
 
 This repository is a clean-room portfolio rebuild. All demo data is synthetic: a fictional employee at a fictional venue, `.example` email domains, and round sample numbers labeled as such. No production data, real client or venue names, or secrets are present anywhere in the repo or its history. Secrets in `.env.example` are placeholders only. The numbers and screenshots are illustrative, not metrics from a live deployment.
 
+## Security and development
+
+This repository was built clean-room: it contains only synthetic demo data and no real client, venue, or financial information. Two gates keep it that way. A local pre-commit hook blocks any commit that contains a private real-data token, and a CI workflow (`.github/workflows/secret-scan.yml`) runs gitleaks on every push and pull request and fails on any secret or credential finding.
+
 ## License
 
 MIT. See [LICENSE](./LICENSE).
