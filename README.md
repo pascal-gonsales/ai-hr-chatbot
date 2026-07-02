@@ -6,7 +6,7 @@ An AI-assisted HR and employee-lifecycle assistant for multi-location restaurant
 
 ## Try it: a runnable demo with zero real data
 
-There is a fully working public demo at `/demo` (and `/demo/chat`) that runs the real Claude tool-use loop against in-memory fixtures, with no database and no authentication. The fixture employee is "Alex Demo" at the fictional Northstar Demo Bistro; every number is round and labeled sample data. The demo route is isolated from the production auth path by the middleware matcher, is rate-limited per IP, and fails closed if the API key is missing. It is the fastest way to see the agent call tools, stream over Server-Sent Events, and respond bilingually (the fixture is set to English; ask in French and it answers in French).
+There is a runnable demo at `/demo` (and `/demo/chat`) that runs the real Claude tool-use loop against in-memory fixtures, with no database and no authentication. The fixture employee is "Alex Demo" at the fictional Northstar Demo Bistro; every number is round and labeled sample data. The demo route is isolated from the production auth path by the middleware matcher, is rate-limited per IP, and fails closed if the API key is missing. It is the fastest way to see the agent call tools, stream over Server-Sent Events, and respond bilingually (the fixture is set to English; ask in French and it answers in French).
 
 ## What it does
 
@@ -30,7 +30,7 @@ The chat route runs a Claude tool-use loop streamed to the browser over Server-S
 - TOCTOU-safe dedupe on the public access-request endpoint: a partial unique index on `lower(email)` where `status = 'pending'` turns a concurrent duplicate into a `23505` unique violation, which the route catches as a soft success using a plain `.insert()` (no explicit `ON CONFLICT`), closing the count-then-insert race and avoiding enumeration.
 - The rate-limit helper function is locked down: explicit `search_path`, `REVOKE EXECUTE` from `PUBLIC`/`anon`/`authenticated`, `GRANT` to `service_role` only.
 - The public access-request form is env-gated and fails closed (returns `503` until `PUBLIC_ACCESS_REQUEST_ENABLED=1`), validates input, derives the client IP, and rate-limits per email and per IP.
-- The public demo chat is isolated, rate-limited (8/min/IP), body-capped (50KB), history-bounded, and returns `503` if the API key is absent.
+- The demo chat is isolated, rate-limited (8/min/IP), body-capped (50KB), history-bounded, and returns `503` if the API key is absent.
 - CI gates lint, typecheck, tests, and build on every push and PR.
 
 ## How to run
