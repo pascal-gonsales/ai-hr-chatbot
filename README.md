@@ -4,10 +4,6 @@ An AI-assisted HR and employee-lifecycle assistant for multi-location restaurant
 
 > Built by Pascal Gonsales. Stack: Next.js 16 (App Router), React 19, TypeScript 5, Tailwind CSS v4, Supabase (Auth + Postgres + RLS + Realtime), and the Claude API.
 
-## Try it: a runnable demo with zero real data
-
-There is a runnable demo at `/demo` (and `/demo/chat`) that runs the real Claude tool-use loop against in-memory fixtures, with no database and no authentication. The fixture employee is "Alex Demo" at the fictional Northstar Demo Bistro; every number is round and labeled sample data. The demo route is isolated from the production auth path by the middleware matcher, is rate-limited per IP, and fails closed if the API key is missing. It is the fastest way to see the agent call tools, stream over Server-Sent Events, and respond bilingually (the fixture is set to English; ask in French and it answers in French).
-
 ## What it does
 
 - Employees authenticate by passwordless email OTP. There is no self-signup: a new person submits an access request, which an admin converts into an employee record.
