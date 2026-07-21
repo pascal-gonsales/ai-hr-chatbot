@@ -4,6 +4,13 @@ An AI-assisted HR and employee-lifecycle assistant for multi-location restaurant
 
 > Built by Pascal Gonsales. Stack: Next.js 16 (App Router), React 19, TypeScript 5, Tailwind CSS v4, Supabase (Auth + Postgres + RLS + Realtime), and the Claude API.
 
+> This is an AI-assisted portfolio prototype, not a production deployment. I defined the
+> problem, the workflow, the guardrails, and the acceptance criteria; Claude Code
+> accelerated much of the implementation and documentation. I am accountable for what
+> ships here, including the scope limits called out below. Earlier commits reference
+> WwithAI, my own venture brand; the repository is kept brand-neutral so the examples are
+> reusable, and no client identity is involved.
+
 ## What it does
 
 - Employees authenticate by passwordless email OTP. There is no self-signup: a new person submits an access request, which an admin converts into an employee record.
@@ -13,9 +20,9 @@ An AI-assisted HR and employee-lifecycle assistant for multi-location restaurant
 
 ## Engineering highlights
 
-### Multi-tenant data isolation: RLS plus service-role re-authorization
+### Per-user data isolation: RLS plus service-role re-authorization
 
-Every tenant boundary is enforced twice. Postgres Row-Level Security policies (with `SECURITY DEFINER` helper functions `kk_current_employee_id()`, `kk_is_admin()`, `kk_current_staff_id()`) scope each user to their own conversations, messages, drafts, and tips, with an admin super-scope. On top of that, any code path that uses the service-role key (which bypasses RLS) re-authorizes ownership in application code first. The production chat route is the clearest example: a client-supplied `conversation_id` is UUID-format-validated, then re-checked that the conversation's `employee_id` matches the authenticated employee before any privileged read or write. A mismatch returns `403`, and existence versus ownership are deliberately not distinguished. The `tests/api/chat-ownership.test.ts` suite proves cross-tenant denial (403) and malformed-id rejection (400).
+This is a single-organization, multi-location prototype: isolation is per employee, not across separate customer tenants (there is no tenant entity, and admins have an organization-wide scope). Within that scope, every access boundary is enforced twice. Postgres Row-Level Security policies (with `SECURITY DEFINER` helper functions `kk_current_employee_id()`, `kk_is_admin()`, `kk_current_staff_id()`) scope each user to their own conversations, messages, drafts, and tips, with an admin super-scope. On top of that, any code path that uses the service-role key (which bypasses RLS) re-authorizes ownership in application code first. The chat route is the clearest example: a client-supplied `conversation_id` is UUID-format-validated, then re-checked that the conversation's `employee_id` matches the authenticated employee before any privileged read or write. A mismatch returns `403`, and existence versus ownership are deliberately not distinguished. The `tests/api/chat-ownership.test.ts` suite exercises the route's cross-user denial (403) and malformed-id (400) branches with mocked data; it does not prove database-level isolation, which would need integration tests.
 
 ### Streaming agent with strict tool discipline
 

@@ -114,9 +114,9 @@ export default function DemoLandingPage() {
         </div>
 
         <footer className="pt-4 text-xs text-zinc-500 leading-relaxed">
-          Production app: multi-tenant Next.js 16 + Claude API + Supabase with auth, RLS,
-          per-conversation ownership checks, append-only decision log, and structured Claude /
-          Codex review cycles. Built by Pascal Gonsales.
+          Portfolio prototype: single-organization Next.js 16 + Claude API + Supabase with
+          auth, RLS, and per-conversation ownership checks. Built by Pascal Gonsales with
+          AI assistance (Claude Code).
         </footer>
       </div>
     </div>
